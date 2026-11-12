@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MOD-84 Deconstructor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --g1:#8A8D91; --g2:#5A5D61; --g3:#3B3D40; --g4:#25272A;
+  --beige:#CFC8B4; --beige2:#B3AB95;
+  --ph:#FFB000; --ph-dim:rgba(255,176,0,.14);
+  --haz-y:#F2C200;
+  --mono:'JetBrains Mono','Courier New',monospace;
+  --vt:'VT323','Courier New',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:#1C1D1F;
+  background-image:
+    linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+  background-size:24px 24px;
+  color:#111; font-family:var(--mono); font-size:12px;
+  display:grid; grid-template-rows:auto 1fr auto; gap:8px; padding:8px;
+  min-height:100vh; overflow-x:hidden;
+}
+/* ---------- panels ---------- */
+.panel{
+  position:relative; background:var(--g1);
+  background-image:linear-gradient(160deg,rgba(255,255,255,.08),rgba(0,0,0,.08));
+  border:3px solid var(--g3);
+  box-shadow:inset 2px 2px 0 #B4B7BA, inset -2px -2px 0 #4A4D51, 0 6px 0 #111, 0 10px 18px rgba(0,0,0,.5);
+  padding:22px 16px 14px;
+}
+.screw{position:absolute;width:11px;height:11px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,#E3E5E7,#8C9095 55%,#4C4F53);
+  box-shadow:0 1px 0 rgba(255,255,255,.35), inset 0 -1px 1px rgba(0,0,0,.5)}
+.screw::after{content:"";position:absolute;left:1px;right:1px;top:4.5px;height:2px;background:#3a3c3f;transform:rotate(var(--r,35deg))}
+.screw.tl{top:5px;left:5px}.screw.tr{top:5px;right:5px;--r:-20deg}.screw.bl{bottom:5px;left:5px;--r:80deg}.screw.br{bottom:5px;right:5px;--r:10deg}
+.ptitle{
+  position:absolute; top:-3px; left:22px; transform:translateY(-50%);
+  background:var(--g4); color:var(--beige); padding:3px 10px; font-weight:800; letter-spacing:.12em; font-size:11px;
+  border:2px solid #000;
+}
+.ptitle b{color:var(--ph)}
+.lbl{font-size:10px;font-weight:800;letter-spacing:.14em;color:#1a1b1d;text-transform:uppercase}
+.sub{font-size:9px;letter-spacing:.1em;color:#2b2d30;opacity:.8}
+.stencil{font-weight:800;letter-spacing:.2em;font-size:10px;color:#2a2b2e;border:2px solid #2a2b2e;padding:1px 6px;display:inline-block}
+.hazard{background:repeating-linear-gradient(45deg,var(--haz-y) 0 12px,#111 12px 24px)}
+.hr{height:3px;background:var(--g2);box-shadow:0 1px 0 #B4B7BA;margin:12px 0}
+
+/* ---------- header ---------- */
+header{display:grid;grid-template-columns:auto 1fr auto;align-items:stretch;gap:8px}
+.brand{display:flex;align-items:center;gap:14px;padding:12px 18px 10px}
+.logo{width:42px;height:42px;background:#111;color:var(--ph);display:grid;place-items:center;font-family:var(--vt);font-size:34px;border:3px solid #000;box-shadow:inset 0 0 12px var(--ph-dim)}
+.brand h1{font-size:17px;letter-spacing:.16em;font-weight:800;color:#111;line-height:1}
+.brand h1 small{display:block;font-size:9px;letter-spacing:.24em;color:#2b2d30;margin-top:5px;font-weight:700}
+.hstripe{border:3px solid #111;display:flex;align-items:center;justify-content:center;min-width:60px}
+.hstripe span{background:#111;color:var(--haz-y);font-weight:800;letter-spacing:.3em;padding:4px 12px;font-size:11px}
+.hstat{display:flex;gap:10px;align-items:center;padding:12px 16px 10px}
+
+/* ---------- screens / insets ---------- */
+.inset{
+  background:#0B0D0B; border:3px solid #111; border-radius:3px;
+  box-shadow:inset 0 0 0 2px #2c2e30, inset 0 0 22px rgba(0,0,0,.9), 0 1px 0 #B4B7BA;
+  color:var(--ph); font-family:var(--vt); font-size:18px; line-height:1.05;
+  text-shadow:0 0 6px var(--ph), 0 0 1px var(--ph);
+  position:relative; overflow:hidden;
+}
+.inset::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.35) 0 1px,transparent 1px 3px),
+             radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55));}
+.seg{position:relative;font-family:var(--vt);font-size:40px;line-height:1;padding:4px 10px;min-width:96px;text-align:right}
+.seg .ghost{position:absolute;right:10px;top:4px;opacity:.09;text-shadow:none}
+.seg small{font-size:14px;margin-left:2px}
+.led{width:10px;height:10px;border-radius:50%;background:#3a2a10;border:2px solid #111;display:inline-block;flex:none}
+.led.on{background:var(--ph);box-shadow:0 0 8px var(--ph),0 0 2px #fff inset}
+.led.red.on{background:#ff3b2f;box-shadow:0 0 8px #ff3b2f}
+
+/* ---------- main grid ---------- */
+main{display:grid;grid-template-columns:300px minmax(0,1fr) 330px;gap:8px;min-height:0}
+.col{display:flex;flex-direction:column;gap:14px;min-height:0}
+
+/* viewport */
+#vpWrap{display:flex;flex-direction:column;padding:22px 12px 12px;min-height:520px}
+#vp{position:relative;flex:1;min-height:420px;height:clamp(420px,72vh,900px);background:#141617;border:4px solid #0a0a0a;
+  box-shadow:inset 0 0 0 2px #3a3c3f, 0 1px 0 #B4B7BA;overflow:hidden;cursor:crosshair}
+#vp canvas{display:block;position:absolute;inset:0;width:100%;height:100%}
+#vp .scan{position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px);mix-blend-mode:multiply}
+#vp .vign{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,.6))}
+.corner{position:absolute;width:26px;height:26px;border:2px solid var(--ph);opacity:.7;pointer-events:none}
+.corner.a{top:10px;left:10px;border-right:0;border-bottom:0}.corner.b{top:10px;right:10px;border-left:0;border-bottom:0}
+.corner.c{bottom:10px;left:10px;border-right:0;border-top:0}.corner.d{bottom:10px;right:10px;border-left:0;border-top:0}
+.hud{position:absolute;font-family:var(--vt);color:var(--ph);text-shadow:0 0 6px var(--ph);font-size:17px;pointer-events:none;line-height:1.05}
+.hud.tl{top:14px;left:44px}.hud.tr{top:14px;right:44px;text-align:right}.hud.bl{bottom:14px;left:44px}.hud.br{bottom:14px;right:44px;text-align:right}
+#refOverlay{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;opacity:0;filter:grayscale(1) contrast(1.2);mix-blend-mode:screen;display:none}
+#tags{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.tag{position:absolute;transform:translate(-50%,-100%);font-family:var(--vt);font-size:15px;color:#111;background:var(--ph);padding:0 5px;white-space:nowrap;box-shadow:0 0 8px var(--ph-dim);border:1px solid #000}
+.tag::after{content:"";position:absolute;left:50%;top:100%;width:1px;height:14px;background:var(--ph)}
+.tag.sel{background:#fff}
+#tip{position:absolute;pointer-events:none;display:none;background:#0b0d0b;border:2px solid var(--ph);color:var(--ph);font-family:var(--vt);font-size:16px;padding:2px 8px;text-shadow:0 0 6px var(--ph);white-space:nowrap;z-index:5}
+.vpbar{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+.vpbar .hazard{flex:1;height:14px;border:2px solid #111;min-width:40px}
+
+/* ---------- buttons ---------- */
+.btn{
+  font-family:var(--mono);font-weight:800;font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  color:#1a1a1a;background:linear-gradient(#DDD7C5,#B8B19C);
+  border:2px solid #222;border-radius:3px;padding:9px 10px 8px;cursor:pointer;
+  box-shadow:0 4px 0 #222,0 6px 10px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.6), inset 0 -2px 0 rgba(0,0,0,.15);
+  transition:transform .05s, box-shadow .05s; position:relative; user-select:none;
+}
+.btn:hover{filter:brightness(1.04)}
+.btn:active,.btn.on{transform:translateY(3px);box-shadow:0 1px 0 #222,0 2px 4px rgba(0,0,0,.45), inset 0 2px 4px rgba(0,0,0,.25)}
+.btn.dark{background:linear-gradient(#55585C,#3A3C40);color:var(--beige)}
+.btn.warn{background:repeating-linear-gradient(45deg,var(--haz-y) 0 8px,#d8aa00 8px 16px);}
+.btn.on{background:linear-gradient(#3A3C40,#2A2C2F);color:var(--ph);text-shadow:0 0 6px var(--ph)}
+.btn:focus-visible{outline:3px solid var(--ph);outline-offset:2px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+
+/* piano / cassette keys for archetype */
+.keys{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.keys .btn{padding:14px 4px 10px;text-align:center;font-size:10px}
+.keys .btn small{display:block;font-size:8px;opacity:.7;margin-top:3px;letter-spacing:.1em}
+
+/* ---------- toggle switches ---------- */
+.tog{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;user-select:none}
+.tog input{position:absolute;opacity:0;pointer-events:none}
+.tog .plate{position:relative;width:46px;height:62px;background:linear-gradient(#6a6d71,#4b4e52);border:2px solid #1a1a1a;border-radius:4px;
+  box-shadow:inset 1px 1px 0 #9a9da0, 0 3px 0 #1a1a1a;display:grid;place-items:center}
+.tog .slot{position:relative;width:16px;height:40px;background:#0d0d0e;border-radius:8px;box-shadow:inset 0 2px 4px #000}
+.tog .bat{position:absolute;left:50%;width:14px;height:24px;margin-left:-7px;bottom:-2px;border-radius:7px 7px 5px 5px;
+  background:linear-gradient(90deg,#9ea2a6,#f2f3f4 40%,#8a8e92);box-shadow:0 4px 5px rgba(0,0,0,.6);transition:all .12s cubic-bezier(.5,1.8,.6,1)}
+.tog input:checked + .plate .bat{bottom:18px;box-shadow:0 -3px 5px rgba(0,0,0,.6)}
+.tog .plate::before{content:"ON";position:absolute;top:2px;font-size:7px;font-weight:800;color:#d9d9d9;letter-spacing:.1em}
+.tog .plate::after{content:"";position:absolute;bottom:4px;width:7px;height:7px;border-radius:50%;background:#3a2a10;border:1px solid #000}
+.tog input:checked + .plate::after{background:var(--ph);box-shadow:0 0 7px var(--ph)}
+.tog input:focus-visible + .plate{outline:3px solid var(--ph);outline-offset:2px}
+.tog .tl{font-size:9px;font-weight:800;letter-spacing:.12em;color:#151517;text-align:center}
+.togs{display:grid;grid-template-columns:repeat(4,1fr);gap:12px 6px}
+
+/* ---------- faders ---------- */
+.fader{width:100%;-webkit-appearance:none;appearance:none;height:34px;background:transparent;cursor:pointer}
+.fader::-webkit-slider-runnable-track{height:10px;background:#0d0d0e;border:2px solid #000;border-radius:2px;box-shadow:inset 0 2px 3px #000,0 1px 0 #B4B7BA}
+.fader::-moz-range-track{height:10px;background:#0d0d0e;border:2px solid #000;border-radius:2px}
+.fader::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:32px;margin-top:-13px;border:2px solid #111;border-radius:3px;
+  background:repeating-linear-gradient(0deg,#2a2b2d 0 2px,#d5d0bf 2px 5px);box-shadow:0 3px 0 #111,0 5px 8px rgba(0,0,0,.5)}
+.fader::-moz-range-thumb{width:20px;height:30px;border:2px solid #111;border-radius:3px;background:repeating-linear-gradient(0deg,#2a2b2d 0 2px,#d5d0bf 2px 5px)}
+.fader:focus-visible{outline:3px solid var(--ph)}
+.ticks{display:flex;justify-content:space-between;font-size:8px;font-weight:800;color:#222;padding:0 4px;margin-top:-4px}
+
+/* ---------- reference ---------- */
+#drop{height:170px;display:grid;place-items:center;text-align:center;cursor:pointer}
+#drop img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;filter:grayscale(1) sepia(1) saturate(3) hue-rotate(var(--hue,-15deg)) brightness(.95) contrast(1.15);opacity:.9}
+#drop.over{box-shadow:inset 0 0 0 3px var(--ph)}
+.swatch{width:26px;height:26px;border:2px solid #111;box-shadow:inset 0 0 0 2px rgba(255,255,255,.3)}
+.readout{font-family:var(--vt);font-size:17px;padding:8px 10px;line-height:1.1}
+
+/* parts list */
+#partList{max-height:300px;overflow:auto;padding:4px}
+#partList button{all:unset;display:grid;grid-template-columns:auto 1fr;gap:8px;width:100%;box-sizing:border-box;padding:3px 6px;cursor:pointer;font-family:var(--vt);font-size:17px;color:var(--ph)}
+#partList button:hover{background:var(--ph-dim)}
+#partList button.sel{background:var(--ph);color:#000;text-shadow:none}
+#partList button.hid{opacity:.35}
+#partList button:focus-visible{outline:2px solid var(--ph)}
+
+#spec{padding:10px 12px;min-height:220px}
+#spec table{width:100%;border-collapse:collapse}
+#spec td{padding:1px 0;vertical-align:top}
+#spec td:first-child{opacity:.6;width:72px}
+#spec h3{font-weight:400;font-size:24px;margin-bottom:6px}
+
+#log{height:140px;overflow:hidden;padding:8px 10px;font-size:15px}
+#log div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* footer ticker */
+footer{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:stretch}
+footer .inset{height:34px;display:flex;align-items:center}
+.ticker{white-space:nowrap;animation:tick 60s linear infinite;padding-left:100%}
+@keyframes tick{to{transform:translateX(-100%)}}
+footer .hazard{width:120px;border:3px solid #111}
+
+@media (max-width:1180px){
+  main{grid-template-columns:280px minmax(0,1fr)}
+  #rightCol{grid-column:1 / -1;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+}
+@media (max-width:760px){
+  body{padding:6px}
+  header{grid-template-columns:1fr}
+  .hstripe{display:none}
+  main{grid-template-columns:1fr}
+  #vpWrap{order:-1;min-height:auto}
+  #vp{min-height:58vh}
+  #rightCol{grid-column:auto;display:flex}
+  .hud.bl{display:none}
+  footer .hazard{display:none}
+  footer{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){.ticker{animation:none;padding-left:0}}
+</style>
+<script type="importmap">
+{"imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+}}
+</script>
+</head>
+<body>
+
+<header>
+  <div class="panel brand">
+    <div class="logo">⌬</div>
+    <h1>MOD-84 // DECONSTRUCTOR<small>INDUSTRIAL HARDWARE TEARDOWN CONSOLE · REV 2.1</small></h1>
+  </div>
+  <div class="hstripe hazard"><span>CAUTION // EXPLODED ASSEMBLY // KEEP HANDS CLEAR</span></div>
+  <div class="panel hstat">
+    <div>
+      <div class="lbl">Sys Clock</div>
+      <div class="inset seg" style="font-size:30px;min-width:120px"><span class="ghost">88:88:88</span><span id="clock">00:00:00</span></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div class="row"><span class="led on" id="ledPwr"></span><span class="lbl">PWR</span></div>
+      <div class="row"><span class="led" id="ledAct"></span><span class="lbl">ACT</span></div>
+      <div class="row"><span class="led red" id="ledWarn"></span><span class="lbl">EXP</span></div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- LEFT -->
+  <div class="col">
+    <section class="panel">
+      <div class="ptitle">A1 // <b>REFERENCE INGEST</b></div>
+      <div class="inset" id="drop" role="button" tabindex="0" aria-label="Load reference image">
+        <div id="dropMsg">[ DROP REFERENCE IMAGE ]<br><span style="font-size:14px;opacity:.7">OR CLICK TO MOUNT · JPG/PNG</span></div>
+        <img id="refImg" alt="" style="display:none">
+      </div>
+      <input type="file" id="file" accept="image/*" hidden>
+      <div class="row" style="margin-top:12px;justify-content:space-between">
+        <div class="row"><div class="swatch" id="sw" style="background:#CFC8B4"></div>
+          <div><div class="lbl">ABS Hue</div><div class="sub" id="swHex">#CFC8B4 · STOCK</div></div></div>
+        <button class="btn dark" id="bHue" disabled>Apply Hue</button>
+      </div>
+      <div class="hr"></div>
+      <div class="row" style="justify-content:space-between">
+        <label class="tog" title="Overlay reference on viewport for silhouette tracing"><input type="checkbox" id="tTrace"><span class="plate"><span class="slot"><span class="bat"></span></span></span><span class="tl">TRACE</span></label>
+        <div style="flex:1;margin-left:12px">
+          <div class="lbl">Overlay Opacity</div>
+          <input class="fader" type="range" id="trOp" min="0" max="100" value="45" aria-label="Overlay opacity">
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="ptitle">A2 // <b>ARTIFACT ARCHETYPE</b></div>
+      <div class="keys" id="archKeys">
+        <button class="btn on" data-a="term">TERM-84<small>TERMINAL</small></button>
+        <button class="btn" data-a="fdd">FDD-35<small>FLOPPY DRV</small></button>
+        <button class="btn" data-a="mouse">PTR-88<small>BALL MOUSE</small></button>
+      </div>
+      <div class="sub" style="margin-top:10px">MATCH ARCHETYPE TO REFERENCE. PROCEDURAL SOLID BUILT FROM MODULE LIBRARY.</div>
+    </section>
+
+    <section class="panel" style="flex:1">
+      <div class="ptitle">A3 // <b>BILL OF MODULES</b></div>
+      <div class="inset" id="partList"></div>
+      <div class="row" style="margin-top:12px">
+        <button class="btn" id="bIso">Isolate</button>
+        <button class="btn" id="bClr">Clear Sel</button>
+        <span class="stencil" id="bomCount" style="margin-left:auto">00 MOD</span>
+      </div>
+    </section>
+  </div>
+
+  <!-- CENTER -->
+  <section class="panel" id="vpWrap">
+    <div class="ptitle">B0 // <b>OPTICAL BENCH</b> · ORTHO-PERSPECTIVE FEED</div>
+    <div id="vp">
+      <img id="refOverlay" alt="">
+      <div id="tags"></div>
+      <div class="scan"></div><div class="vign"></div>
+      <div class="corner a"></div><div class="corner b"></div><div class="corner c"></div><div class="corner d"></div>
+      <div class="hud tl" id="hudTL">ASSY: —</div>
+      <div class="hud tr" id="hudTR">CAM —</div>
+      <div class="hud bl">DRAG: ORBIT · RMB: PAN · WHEEL: ZOOM · CLICK: SELECT MODULE</div>
+      <div class="hud br" id="hudBR">TRI 0</div>
+      <div id="tip"></div>
+    </div>
+    <div class="vpbar">
+      <button class="btn warn" id="bSeq">▶ Run Teardown</button>
+      <button class="btn" id="bView">Reset View</button>
+      <div class="hazard"></div>
+      <span class="stencil">FIELD UNIT 07-B</span>
+    </div>
+  </section>
+
+  <!-- RIGHT -->
+  <div class="col" id="rightCol">
+    <section class="panel">
+      <div class="ptitle">C1 // <b>DECONSTRUCTION</b></div>
+      <div class="row" style="justify-content:space-between;align-items:flex-end">
+        <div><div class="lbl">Separation</div><div class="sub">AXIAL OFFSET · STAGED</div></div>
+        <div class="inset seg"><span class="ghost">888<small>%</small></span><span id="expVal">000</span><small>%</small></div>
+      </div>
+      <input class="fader" type="range" id="exp" min="0" max="100" value="0" aria-label="Explode amount" style="margin-top:8px">
+      <div class="ticks"><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div>
+      <div class="hr"></div>
+      <div class="row" style="justify-content:space-between;align-items:flex-end">
+        <div><div class="lbl">Section Plane X</div><div class="sub">WALL THICKNESS INSPECTION</div></div>
+        <div class="inset seg" style="font-size:28px;min-width:80px"><span class="ghost">-888</span><span id="secVal">+000</span></div>
+      </div>
+      <input class="fader" type="range" id="sec" min="-100" max="100" value="0" aria-label="Section plane position">
+    </section>
+
+    <section class="panel">
+      <div class="ptitle">C2 // <b>BENCH CONTROLS</b></div>
+      <div class="togs">
+        <label class="tog"><input type="checkbox" id="tXray"><span class="plate"><span class="slot"><span class="bat"></span></span></span><span class="tl">X-RAY</span></label>
+        <label class="tog"><input type="checkbox" id="tSec"><span class="plate"><span class="slot"><span class="bat"></span></span></span><span class="tl">SECTION</span></label>
+        <label class="tog"><input type="checkbox" id="tLab"><span class="plate"><span class="slot"><span class="bat"></span></span></span><span class="tl">LABELS</span></label>
+        <label class="tog"><input type="checkbox" id="tPart"><span class="plate"><span class="slot"><span class="bat"></span></span></span><span class="tl">PARTING</span></label>
+        <label class="tog"><input type="checkbox" id="tRot"><span class="plate"><span class="slot"><span class="bat"></span></span></span><span class="tl">ROTATE</span></label>
+        <label class="tog"><input type="checkbox" id="tGrid" checked><span class="plate"><span class="slot"><span class="bat"></span></span></span><span class="tl">GRID</span></label>
+        <label class="tog"><input type="checkbox" id="tPh"><span class="plate"><span class="slot"><span class="bat"></span></span></span><span class="tl">P1 GREEN</span></label>
+        <label class="tog"><input type="checkbox" id="tSnd" checked><span class="plate"><span class="slot"><span class="bat"></span></span></span><span class="tl">AUDIO</span></label>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="ptitle">C3 // <b>MODULE SPEC</b></div>
+      <div class="inset" id="spec"><h3>NO MODULE SELECTED</h3>CLICK A COMPONENT IN THE<br>OPTICAL BENCH OR BILL OF<br>MODULES TO READ SPEC SHEET.</div>
+    </section>
+
+    <section class="panel">
+      <div class="ptitle">C4 // <b>SYS LOG</b></div>
+      <div class="inset" id="log"></div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="hazard"></div>
+  <div class="inset"><div class="ticker" id="ticker">MOD-84 DECONSTRUCTOR ONLINE ··· ALL HOUSINGS ABS 94-V0 UNLESS NOTED ··· NOMINAL WALL 2.5MM · RIB 60% OF WALL · DRAFT ≥1° ON ALL VERTICAL FACES ··· SCREW BOSS OD = 2.0–2.4× SCREW Ø ··· PARTING LINE TOLERANCE ±0.05MM ··· DO NOT OPERATE CRT WITH HOOD REMOVED — 25KV ANODE ··· </div></div>
+  <div class="hazard"></div>
+</footer>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+/* ============ DOM helpers ============ */
+const $ = s => document.querySelector(s);
+document.querySelectorAll('.panel').forEach(p=>{ for(const c of ['tl','tr','bl','br']){ const s=document.createElement('span'); s.className='screw '+c; p.appendChild(s);} });
+
+/* ============ audio ============ */
+let AC=null;
+const snd = () => $('#tSnd').checked;
+function blip(f=880,d=.04,type='square',v=.04){
+  if(!snd()) return;
+  try{
+    AC = AC || new (window.AudioContext||window.webkitAudioContext)();
+    const o=AC.createOscillator(), g=AC.createGain(), t=AC.currentTime;
+    o.type=type; o.frequency.setValueAtTime(f,t);
+    g.gain.setValueAtTime(v,t); g.gain.exponentialRampToValueAtTime(.0001,t+d);
+    o.connect(g).connect(AC.destination); o.start(t); o.stop(t+d+.01);
+  }catch(e){}
+}
+const thunk = () => { blip(110,.12,'triangle',.18); blip(2200,.012,'square',.03); };
+const click = () => blip(1800,.015,'square',.03);
+
+/* ============ log ============ */
+const logEl=$('#log');
+function log(msg){
+  const d=document.createElement('div');
+  const t=new Date().toTimeString().slice(0,8);
+  d.textContent=`${t} ${msg}`;
+  logEl.prepend(d);
+  while(logEl.children.length>14) logEl.lastChild.remove();
+  const a=$('#ledAct'); a.classList.add('on'); clearTimeout(log._t); log._t=setTimeout(()=>a.classList.remove('on'),180);
+}
+
+/* ============ phosphor ============ */
+const PH={amber:'#FFB000',green:'#33FF33'};
+let phosphor=PH.amber;
+
+/* ============ three setup ============ */
+const vp=$('#vp');
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.localClippingEnabled=true;
+renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.05;
+vp.prepend(renderer.domElement);
+
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x17191a);
+scene.fog=new THREE.Fog(0x17191a,180,420);
+const camera=new THREE.PerspectiveCamera(35,1,.1,1200);
+const controls=new OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true; controls.dampingFactor=.08; controls.autoRotateSpeed=.8;
+
+scene.add(new THREE.HemisphereLight(0xf2efe6,0x2a2c2e,1.1));
+const key=new THREE.DirectionalLight(0xfff4e0,2.6); key.position.set(40,80,50); key.castShadow=true;
+key.shadow.mapSize.set(2048,2048); key.shadow.bias=-.0004; key.shadow.normalBias=.02;
+scene.add(key); scene.add(key.target);
+const rim=new THREE.DirectionalLight(0x9fb4ff,.8); rim.position.set(-60,30,-50); scene.add(rim);
+
+const shadowPlane=new THREE.Mesh(new THREE.PlaneGeometry(800,800),new THREE.ShadowMaterial({opacity:.35}));
+shadowPlane.rotation.x=-Math.PI/2; shadowPlane.receiveShadow=true; scene.add(shadowPlane);
+let grid=null;
+function makeGrid(size){
+  if(grid){scene.remove(grid); grid.geometry.dispose();}
+  grid=new THREE.GridHelper(size,40,new THREE.Color(phosphor),new THREE.Color(phosphor));
+  grid.material.transparent=true; grid.material.opacity=.16; grid.material.depthWrite=false;
+  grid.visible=$('#tGrid').checked; scene.add(grid);
+}
+
+/* ============ material system ============ */
+let MATS=[];
+const clipPlane=new THREE.Plane(new THREE.Vector3(-1,0,0),0);
+const state={xray:false,section:false,labels:false,parting:false};
+const edgeMat=new THREE.LineBasicMaterial({color:phosphor,transparent:true,opacity:.55});
+const selEdgeMat=new THREE.LineBasicMaterial({color:0xffffff});
+let absColor=new THREE.Color('#CFC8B4');
+
+function applyMat(m){
+  m.clippingPlanes = state.section ? [clipPlane] : null;
+  const x = state.xray && !m.userData.keep;
+  m.transparent = x; m.opacity = x ? .16 : 1; m.depthWrite = !x;
+  m.needsUpdate = true;
+}
+function M(color,o={}){
+  const m=new THREE.MeshStandardMaterial({color,roughness:o.r??.72,metalness:o.m??0,side:THREE.DoubleSide});
+  if(o.e){ m.emissive=new THREE.Color(o.e); m.emissiveIntensity=o.ei??1; }
+  if(o.map){ m.map=o.map; m.emissiveMap=o.map; m.emissive=new THREE.Color(0xffffff); m.emissiveIntensity=1.1; }
+  m.userData.role=o.role||null;
+  m.userData.baseEmissive=m.emissive.clone(); m.userData.baseEI=m.emissiveIntensity;
+  MATS.push(m); applyMat(m); return m;
+}
+const ABS = () => M(absColor.clone(),{role:'abs',r:.78});
+const ABS2 = () => M(absColor.clone().multiplyScalar(.82),{role:'abs2',r:.8});
+const METAL = () => M(0xA9ADB2,{m:.85,r:.35});
+const DARK = () => M(0x2b2c2e,{r:.85});
+const PCBM = () => M(0x2E5E3A,{r:.6});
+
+/* ============ geometry helpers ============ */
+const GC=new Map();
+const boxG=(w,h,d)=>{const k=`b${w}|${h}|${d}`; if(!GC.has(k)) GC.set(k,new THREE.BoxGeometry(w,h,d)); return GC.get(k);};
+function mesh(geo,mat,x=0,y=0,z=0){const m=new THREE.Mesh(geo,mat); m.position.set(x,y,z); m.castShadow=m.receiveShadow=true; return m;}
+const box=(w,h,d,mat,x,y,z)=>mesh(boxG(w,h,d),mat,x,y,z);
+function cyl(rt,rb,h,mat,x=0,y=0,z=0,seg=24,axis='y'){
+  const k=`c${rt}|${rb}|${h}|${seg}`; if(!GC.has(k)) GC.set(k,new THREE.CylinderGeometry(rt,rb,h,seg));
+  const m=mesh(GC.get(k),mat,x,y,z);
+  if(axis==='z') m.rotation.x=Math.PI/2; if(axis==='x') m.rotation.z=Math.PI/2;
+  return m;
+}
+/* hollow molded shell built from wall slabs; `open` lists omitted faces */
+function shell(w,h,d,t,mat,open=[]){
+  const g=new THREE.Group();
+  const F={top:[w,t,d,0,h/2-t/2,0],bottom:[w,t,d,0,-h/2+t/2,0],front:[w,h,t,0,0,d/2-t/2],
+           back:[w,h,t,0,0,-d/2+t/2],left:[t,h,d,-w/2+t/2,0,0],right:[t,h,d,w/2-t/2,0,0]};
+  for(const k in F) if(!open.includes(k)) g.add(box(...F[k],mat));
+  return g;
+}
+/* screw boss: OD wall + cored pilot hole */
+function boss(mat,x,y,z,h,r=.6){
+  const g=new THREE.Group(); g.position.set(x,y,z);
+  g.add(cyl(r,r*1.12,h,mat,0,0,0,18));            // drafted OD
+  g.add(cyl(r*.42,r*.42,h+.02,M(0x111111),0,0,0,12)); // pilot core
+  for(let i=0;i<4;i++){ const gs=box(r*.25,h*.7,r*1.3,mat,0,-h*.15,0); gs.rotation.y=i*Math.PI/2; gs.translateZ(r*1.1); g.add(gs); } // gussets
+  return g;
+}
+function screw(mat,x,y,z,len,r=.18){
+  const g=new THREE.Group(); g.position.set(x,y,z);
+  g.add(cyl(r,r*.85,len,mat,0,len/2,0,10));
+  g.add(cyl(r*2.1,r*2.1,r*.9,mat,0,0,0,16));
+  const s=box(r*3.6,r*.4,r*.5,M(0x222222),0,-r*.3,0); g.add(s);
+  return g;
+}
+function partingLine(parent,w,d,y,ellipse=false){
+  let pts=[];
+  if(ellipse){ for(let i=0;i<=64;i++){const a=i/64*Math.PI*2; pts.push(new THREE.Vector3(Math.cos(a)*w,y,Math.sin(a)*d));} }
+  else pts=[[-w/2,-d/2],[w/2,-d/2],[w/2,d/2],[-w/2,d/2],[-w/2,-d/2]].map(([x,z])=>new THREE.Vector3(x*1.004,y,z*1.004));
+  const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),new THREE.LineBasicMaterial({color:0xff3b2f}));
+  l.userData.parting=true; l.visible=state.parting; parent.add(l);
+}
+let seed=7; const rnd=()=>((seed=(seed*16807)%2147483647)/2147483647);
+
+/* ============ parts registry ============ */
+let model=null, parts=[], S=10, selected=null, isolated=false, screenMat=null;
+function part(def,obj){
+  obj.userData.partIndex=parts.length;
+  obj.traverse(o=>{o.userData.partIndex=parts.length;});
+  model.add(obj);
+  parts.push({...def,obj,base:obj.position.clone(),dir:new THREE.Vector3(...def.dir)});
+}
+
+/* ============ CRT screen texture ============ */
+const scrC=document.createElement('canvas'); scrC.width=512; scrC.height=352;
+const sx=scrC.getContext('2d');
+const scrTex=new THREE.CanvasTexture(scrC); scrTex.colorSpace=THREE.SRGBColorSpace;
+const scrLines=['MOD-84 TERMINAL BIOS V2.1','(C) 1984 SYSTEMS DIVISION','','MEMORY TEST ...... 640K OK','FDD0 ............. READY','KBD MATRIX ....... 61 KEYS','> DIAG /CHASSIS'];
+function drawScreen(t){
+  sx.fillStyle='#030503'; sx.fillRect(0,0,512,352);
+  sx.fillStyle=phosphor; sx.shadowColor=phosphor; sx.shadowBlur=8;
+  sx.font='26px VT323, monospace';
+  const lines=[...scrLines, `SEPARATION ....... ${String(Math.round(expCur*100)).padStart(3,'0')}%`, (selected!=null?`SEL ${parts[selected].pn}`:'')];
+  lines.forEach((l,i)=>sx.fillText(l,22,40+i*28));
+  if(Math.floor(t*2)%2) sx.fillRect(22,40+lines.length*28-20,14,22);
+  sx.shadowBlur=0; sx.fillStyle='rgba(0,0,0,.35)';
+  for(let y=0;y<352;y+=3) sx.fillRect(0,y,512,1);
+  const g=sx.createRadialGradient(256,176,120,256,176,330); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,0,.7)');
+  sx.fillStyle=g; sx.fillRect(0,0,512,352);
+  scrTex.needsUpdate=true;
+}
+
+/* ===================================================================
+   ARCHETYPE 1 : MOD-84 ALL-IN-ONE TERMINAL (units: cm)
+   =================================================================== */
+function buildTerminal(){
+  const BOSS=[[-18,-16],[18,-16],[-18,16],[18,16],[0,-16],[0,16]];
+  // screws
+  { const g=new THREE.Group(); const m=METAL();
+    BOSS.forEach(([x,z])=>g.add(screw(m,x,.05,z,3.6)));
+    part({pn:'MOD-84-90',name:'FASTENER KIT',mat:'STEEL ZN-PLATED',proc:'COLD HEADED / ROLLED',wall:'—',draft:'—',fast:'6× M3×36 PAN PH TYPE-B',note:'THREAD-FORMING INTO ABS BOSSES. TORQUE 0.6 N·m MAX TO AVOID BOSS CRACK.',dir:[0,-1.9,0],ord:0},g); }
+  // lower tray
+  { const g=new THREE.Group(); g.position.set(0,2.6,0); const m=ABS();
+    g.add(shell(40,5.2,36,.8,m,['top']));
+    for(let i=-2;i<=2;i++) g.add(box(38.4,.5,.3,m,0,-1.55,i*6.5));
+    for(const x of [-12,0,12]) g.add(box(.3,.5,34.4,m,x,-1.55,0));
+    BOSS.forEach(([x,z])=>g.add(boss(m,x*.94,-.25,z*.92,3.1)));
+    const fm=M(0x1a1a1a,{r:.95});
+    for(const [x,z] of [[-17,-15],[17,-15],[-17,15],[17,15]]) g.add(cyl(1.2,1.2,.5,fm,x,-2.85,z));
+    for(let i=0;i<7;i++) g.add(box(.5,2.4,.12,M(0x111111),-14+i*1.2,-.2,-18.05)); // rear vent louvres
+    partingLine(g,40,36,2.6);
+    part({pn:'MOD-84-01',name:'LOWER CHASSIS TRAY',mat:'ABS 94-V0 · BEIGE',proc:'INJ. MOLD · 2-PLATE',wall:'2.5 MM NOMINAL',draft:'1.5° EXT / 1.0° INT',fast:'6× BOSS Ø6 → M3',note:'CROSS-RIB GRID 0.6T (60% WALL) PREVENTS SINK ON A-SURFACE. GUSSETED BOSSES.',dir:[0,-1,0],ord:.2},g); }
+  // PCB
+  { const g=new THREE.Group(); g.position.set(0,1.4,-1); const pm=PCBM(), cm=M(0x161616,{r:.5}), gm=M(0xC9A54A,{m:.9,r:.3});
+    g.add(box(34,.16,28,pm,0,0,0));
+    seed=11;
+    for(let i=0;i<26;i++){ const w=1+rnd()*3.5, d=.8+rnd()*1.4; g.add(box(w,.35,d,cm,-15+rnd()*30,.25,-12+rnd()*22)); }
+    g.add(box(5,.5,5,cm,-6,.33,-4)); g.add(box(3.2,.08,3.2,gm,-6,.62,-4));
+    g.add(box(8,.6,.8,M(0xd8d2c0),-3,.38,12)); // KB ribbon header
+    for(let i=0;i<5;i++) g.add(cyl(.45,.45,1.4,M(0x1d3a7a,{r:.4}),8+i*1.3,.78,-10));
+    part({pn:'MOD-84-20',name:'MAIN LOGIC BOARD',mat:'FR-4 · 1.6MM · 2-LAYER',proc:'WAVE SOLDER · THT',wall:'—',draft:'—',fast:'4× SNAP STANDOFF',note:'Z80-CLASS CPU, 64K DRAM BANK. KEYBOARD MATRIX VIA 16-PIN IDC.',dir:[0,-.45,.6],ord:.78},g); }
+  // deck (upper base cover)
+  { const g=new THREE.Group(); g.position.set(0,5.6,0); const m=ABS();
+    g.add(box(40,.8,22,m,0,0,-7)); g.add(box(40,.8,3,m,0,0,16.5));
+    g.add(box(4,.8,11,m,-18,0,9.5)); g.add(box(9,.8,11,m,15.5,0,9.5));
+    g.add(box(40,.8,.8,m,0,-.6,17.6)); // front lip
+    for(const x of [-10,0,10]) g.add(box(.3,1,20,m,x,-.9,-7)); // underside ribs
+    g.add(cyl(.28,.28,.2,M(0xff3b2f,{e:0xff2a1a,ei:2}),14,.45,6.5,12));
+    g.add(cyl(.28,.28,.2,M(0x33ff33,{e:0x22ff22,ei:2}),16,.45,6.5,12));
+    g.add(box(6,.04,2.2,M(0x2a2b2d),15.5,.42,11));
+    part({pn:'MOD-84-02',name:'KEYBOARD DECK COVER',mat:'ABS 94-V0 · BEIGE',proc:'INJ. MOLD · SLIDE CORE',wall:'2.5 MM',draft:'1.0° ON CUTOUT WALLS',fast:'SNAP HOOKS ×8 + 2 SCREWS',note:'KEYWELL CUTOUT 270×110. LED LIGHT-PIPES PRESS-FIT FROM BELOW.',dir:[0,.38,.18],ord:.66},g); }
+  // switch plate
+  { const g=new THREE.Group(); g.position.set(-2.5,4.95,9.5); const m=METAL(), hm=M(0x2d2e30,{r:.6});
+    g.add(box(27,.2,11,m,0,0,0));
+    keyLayout((x,z,w)=>g.add(box(Math.min(w,1.4),.8,1.4,hm,x+2.5,.5,z-9.5)));
+    part({pn:'MOD-84-31',name:'SWITCH PLATE ASSY',mat:'SPCC STEEL 1.5MM',proc:'STAMPED · PUNCHED',wall:'1.5 MM',draft:'—',fast:'CLIPPED TO DECK',note:'61× CLICKY LEAF-SPRING SWITCHES. 19.05MM PITCH. 3.8MM TRAVEL.',dir:[0,.72,.38],ord:.72},g); }
+  // keycaps
+  { const g=new THREE.Group(); g.position.set(0,6.45,0); const kb=M(0xE4DECD,{r:.6}), km=M(0x9D978A,{r:.6});
+    keyLayout((x,z,w,mod)=>g.add(box(w-.2,.9,1.7,mod?km:kb,x,0,z)));
+    part({pn:'MOD-84-30',name:'KEYCAP ARRAY · 61 KEY',mat:'PBT · DYE-SUB LEGENDS',proc:'2-SHOT MOLD',wall:'1.4 MM',draft:'4° SKIRT',fast:'CROSS-STEM FRICTION FIT',note:'SCULPTED PROFILE ROWS R1–R4. MODIFIERS IN DARK GRAY PER 1984 SPEC.',dir:[0,1.15,.5],ord:.05},g); }
+  // hood
+  { const g=new THREE.Group(); g.position.set(0,18,-8); const m=ABS();
+    g.add(box(.8,24,20,m,-15.6,0,0)); g.add(box(.8,24,20,m,15.6,0,0));
+    g.add(box(32,.8,11,m,0,11.6,4.5));
+    g.add(box(32,.8,.8,m,0,11.6,-9.6)); g.add(box(.8,.8,9,m,-15.6,11.6,-5.5)); g.add(box(.8,.8,9,m,15.6,11.6,-5.5));
+    for(const z of [-6,0,6]) g.add(box(30.4,1.2,.3,m,0,10.6,z)); // roof ribs
+    for(const y of [-6,4]) for(const x of [-15.1,15.1]) g.add(box(.3,.3,19,m,x,y,0));
+    g.add(boss(m,-14.6,-10,-8,3,.5)); g.add(boss(m,14.6,-10,-8,3,.5));
+    part({pn:'MOD-84-10',name:'CRT HOOD SHELL',mat:'ABS/PC BLEND · BEIGE',proc:'INJ. MOLD · LIFTERS',wall:'3.0 MM',draft:'2.0° (TEXTURE MT-11010)',fast:'4× M3 FROM BELOW',note:'LARGEST MOLDING. ROOF RIBS RESIST OIL-CAN. 25KV CLEARANCE ≥ 12MM TO ANODE.',dir:[0,1,-.42],ord:.3},g); }
+  // vent grill
+  { const g=new THREE.Group(); g.position.set(0,29.6,-13.5); const m=ABS2();
+    g.add(box(30.4,.8,.6,m,0,0,-4.2)); g.add(box(30.4,.8,.6,m,0,0,4.2));
+    for(let i=0;i<11;i++) g.add(box(30.4,.8,.35,m,0,0,-3.6+i*.72));
+    for(const x of [-12,-4,4,12]) g.add(box(.4,.8,9,m,x,0,0));
+    part({pn:'MOD-84-11',name:'THERMAL VENT INSERT',mat:'ABS · WARM GRAY',proc:'INJ. MOLD',wall:'1.8 MM',draft:'1.5° ON LOUVRES',fast:'4× SNAP + HEAT STAKE',note:'CONVECTIVE EXHAUST FOR FLYBACK & YOKE. FINGER-PROOF GAP 3.2MM.',dir:[0,1.55,-.55],ord:.12},g); }
+  // rear panel
+  { const g=new THREE.Group(); g.position.set(0,18,-17.6); const m=ABS2(), mt=METAL(), dk=DARK();
+    g.add(box(32,24,.8,m,0,0,0));
+    for(let i=0;i<12;i++) g.add(box(.5,8,.1,dk,-11+i*2,5,-.42));
+    g.add(box(5,1.6,.6,mt,-8,-7,-.6)); g.add(box(3.6,1.6,.6,mt,0,-7,-.6));
+    g.add(box(1.8,1.2,.8,M(0xc1271c),9,-7,-.6));
+    g.add(box(10,2.4,.05,M(0x1d1e20),-4,-3,-.43));
+    part({pn:'MOD-84-12',name:'REAR I/O PANEL',mat:'ABS · WARM GRAY',proc:'INJ. MOLD',wall:'2.5 MM',draft:'1.0°',fast:'2× M3 + TONGUE',note:'DB-25 RS-232, DE-9 AUX, ROCKER MAINS SWITCH. LOUVRE BANK FOR INTAKE.',dir:[0,.1,-1.2],ord:.24},g); }
+  // bezel
+  { const g=new THREE.Group(); g.position.set(0,18,2.6); const m=ABS(), dk=M(0x3a3b3d);
+    g.add(box(32,2.5,1.2,m,0,10.75,0)); g.add(box(32,6.5,1.2,m,0,-8.75,0));
+    g.add(box(5,15,1.2,m,-13.5,2,0)); g.add(box(5,15,1.2,m,13.5,2,0));
+    g.add(box(22.4,.4,1.4,dk,0,9.3,-.1)); g.add(box(22.4,.4,1.4,dk,0,-5.3,-.1));
+    g.add(box(.4,15,1.4,dk,-11,2,-.1)); g.add(box(.4,15,1.4,dk,11,2,-.1));
+    g.add(cyl(.7,.75,.6,DARK(),10.5,-8.5,.8,18,'z')); g.add(cyl(.7,.75,.6,DARK(),13,-8.5,.8,18,'z'));
+    g.add(box(4,.9,.1,M(0xB8BCC0,{m:.8,r:.3}),12,10.75,.62));
+    part({pn:'MOD-84-13',name:'FRONT BEZEL',mat:'ABS 94-V0 · BEIGE',proc:'INJ. MOLD · CAM SLIDES',wall:'2.5 MM',draft:'3° ON SCREEN OPENING',fast:'6× SNAP HOOKS',note:'SCREEN MASK 220×150. ANTI-GLARE GASKET SEAT. BRIGHTNESS/CONTRAST POTS.',dir:[0,0,1.25],ord:.4},g); }
+  // CRT
+  { const g=new THREE.Group(); g.position.set(0,20,0);
+    screenMat=M(0xffffff,{map:scrTex,r:.25}); screenMat.userData.keep=true;
+    const glass=M(0x1b1d1c,{r:.2,m:.3});
+    const face=mesh(boxG(22,15,.6),[glass,glass,glass,glass,screenMat,glass],0,0,1.6); g.add(face);
+    const fun=mesh(new THREE.CylinderGeometry(8.5,1.6,12,40,1,true),glass,0,0,-4.7); fun.rotation.x=Math.PI/2; g.add(fun);
+    g.add(cyl(1.3,1.3,5,glass,0,0,-13.2,20,'z'));
+    const yoke=mesh(new THREE.TorusGeometry(2.2,.8,12,28),M(0x8a4b22,{m:.6,r:.4}),0,0,-10.3); g.add(yoke);
+    g.add(box(3,3,.3,PCBM(),0,0,-15.9));
+    g.add(box(23,.5,.5,METAL(),0,7.8,1)); g.add(box(23,.5,.5,METAL(),0,-7.8,1));
+    part({pn:'MOD-84-40',name:'CRT DISPLAY ASSY',mat:'GLASS · P3 AMBER / P1',proc:'PURCHASED · 12" 90°',wall:'—',draft:'—',fast:'4× MOUNTING EARS',note:'IMPLOSION BAND. DEFLECTION YOKE + NECK BOARD. DISCHARGE ANODE BEFORE SERVICE.',dir:[0,.15,.62],ord:.55},g); }
+  // floppy
+  { const g=new THREE.Group(); g.position.set(-6,9.25,0); const mt=METAL(), bk=M(0x1e1f21,{r:.6});
+    g.add(box(10,2.6,14,mt,0,0,-5));
+    g.add(box(10.6,2.8,.5,bk,0,0,3.45));
+    g.add(box(7.2,.32,.1,M(0x050505),0,.35,3.72));
+    g.add(box(1.4,.6,.4,M(0x6b6d70),3.8,-.75,3.8));
+    g.add(cyl(.18,.18,.2,M(0x33ff33,{e:0x22ff22,ei:1.6}),-4.2,-.8,3.75,10,'z'));
+    g.add(box(8,.16,10,PCBM(),0,-1.4,-5));
+    part({pn:'MOD-84-50',name:'3.5" FDD MODULE',mat:'STEEL FRAME · ABS FASCIA',proc:'PURCHASED SUB-ASSY',wall:'—',draft:'—',fast:'4× M3 SIDE RAILS',note:'1.44MB HD. 34-PIN SHUGART BUS + 4-PIN POWER. AUTO-SHUTTER DOOR.',dir:[-.35,0,.95],ord:.5},g); }
+  model.userData.partingDone=true;
+}
+function keyLayout(fn){
+  const P=1.9, z0=5.6, x0=-15;
+  const offs=[0,.5,.8,1.2];
+  for(let r=0;r<4;r++) for(let c=0;c<13;c++){
+    const mod=(c===0||c===12||(r===0&&c===12));
+    fn(x0+c*P+offs[r], z0+r*P, 1.9, mod);
+  }
+  const zr=z0+4*P;
+  fn(-14.2,zr,3.2,true); fn(-3.5,zr,13.2,false); fn(6.3,zr,3.2,true); fn(9.1,zr,2.2,true);
+}
+
+/* ===================================================================
+   ARCHETYPE 2 : MOD-35 EXTERNAL FLOPPY DRIVE
+   =================================================================== */
+function buildFDD(){
+  const B=[[-6,-7.8],[6,-7.8],[-6,7.8],[6,7.8]];
+  { const g=new THREE.Group(); const m=METAL(); B.forEach(([x,z])=>g.add(screw(m,x,.05,z,1.8,.12)));
+    part({pn:'MOD-35-90',name:'FASTENER KIT',mat:'STEEL ZN',proc:'COLD HEADED',wall:'—',draft:'—',fast:'4× M2.6×18',note:'HIDDEN UNDER RUBBER FEET. TORQUE 0.3 N·m.',dir:[0,-1.9,0],ord:0},g); }
+  { const g=new THREE.Group(); g.position.set(0,1.25,0); const m=ABS();
+    g.add(shell(14,2.5,18,.5,m,['top','front']));
+    B.forEach(([x,z])=>g.add(boss(m,x,-.1,z,1.8,.4)));
+    for(const z of [-4,0,4]) g.add(box(13,.4,.2,m,0,-.8,z));
+    for(const [x,z] of [[-5.5,-7],[5.5,-7],[-5.5,7],[5.5,7]]) g.add(cyl(.6,.6,.25,M(0x151515,{r:.95}),x,-1.35,z));
+    partingLine(g,14,18,1.25);
+    part({pn:'MOD-35-01',name:'LOWER HOUSING',mat:'ABS 94-V0 · PLATINUM',proc:'INJ. MOLD',wall:'2.0 MM',draft:'1.0°',fast:'4× BOSS → M2.6',note:'FRONT OPEN FOR BEZEL TONGUE. LOCATING RIBS FOR STEEL FRAME.',dir:[0,-1,0],ord:.3},g); }
+  { const g=new THREE.Group(); g.position.set(0,3.25,0); const m=ABS(), dk=DARK();
+    g.add(shell(14,1.5,18,.5,m,['bottom','front']));
+    for(let i=0;i<8;i++) g.add(box(.25,.05,4,dk,-3+i*.8,.76,-5.5));
+    for(const x of [-4,0,4]) g.add(box(.2,.6,17,m,x,.2,0));
+    part({pn:'MOD-35-02',name:'UPPER COVER',mat:'ABS 94-V0 · PLATINUM',proc:'INJ. MOLD',wall:'2.0 MM',draft:'1.0° / TEXTURE VDI-27',fast:'4 SNAP HOOKS',note:'VENT SLOTS OVER STEPPER. DOUBLE-WALL LIP AT PARTING LINE FOR ESD.',dir:[0,1.25,0],ord:.15},g); }
+  { const g=new THREE.Group(); g.position.set(0,2,9.25); const m=M(0x3d3f42,{r:.6});
+    g.add(box(14,4,.5,m,0,0,0));
+    g.add(box(9.6,.5,.52,M(0x0b0b0b),0,.4,0)); g.add(box(9.4,.42,.1,M(0x55575a),0,.4,.24));
+    g.add(cyl(.16,.16,.2,M(0x33ff33,{e:0x22ff22,ei:2}),-5.4,-1.1,.3,10,'z'));
+    g.add(box(4,.12,.05,M(0x9a9da0),-2.5,-1.2,.27));
+    part({pn:'MOD-35-03',name:'FRONT BEZEL',mat:'ABS · CHARCOAL',proc:'INJ. MOLD',wall:'1.5 MM',draft:'2.0°',fast:'TONGUE + 2 CLIPS',note:'SPRING SHUTTER DOOR, LED LIGHT-PIPE, EJECT APERTURE.',dir:[0,0,1.1],ord:.2},g); }
+  { const g=new THREE.Group(); g.position.set(4.5,1.1,9.6);
+    g.add(box(1.4,.6,.9,M(0x55575a),0,0,0)); g.add(box(.3,.3,4,METAL(),0,0,-2.4));
+    part({pn:'MOD-35-04',name:'EJECT BUTTON + ROD',mat:'POM / STEEL ROD',proc:'INJ. MOLD',wall:'1.2 MM',draft:'1.0°',fast:'PRESS-FIT ON ROD',note:'POM FOR LOW FRICTION. 2.5MM TRAVEL TO RELEASE CAM.',dir:[0,0,1.7],ord:.25},g); }
+  { const g=new THREE.Group(); g.position.set(0,2.05,2.5); const dk=M(0x2a2b2e,{r:.5});
+    g.add(box(9,.33,9.4,dk,0,0,0));
+    g.add(box(5,.37,3.4,METAL(),-.8,0,-3));
+    g.add(box(1.8,.38,1.2,M(0x111111),-.8,0,-3));
+    g.add(box(6.8,.36,3.4,M(0xE9E4D6),0,0,3));
+    g.add(cyl(1.2,1.2,.05,METAL(),0,-.18,0));
+    g.add(box(.5,.36,.6,M(0x111111),4,0,4.2));
+    part({pn:'MOD-35-80',name:'3.5" MEDIA · 1.44MB',mat:'ABS SHELL · PET MYLAR',proc:'ULTRASONIC WELD',wall:'1.0 MM',draft:'—',fast:'—',note:'SPRING-LOADED STAINLESS SHUTTER. WRITE-PROTECT SLIDE. HUB MAGNETICALLY CLAMPED.',dir:[0,.55,1.65],ord:.02},g); }
+  { const g=new THREE.Group(); g.position.set(3.5,1.6,-1); const mt=METAL();
+    g.add(cyl(.12,.12,10,mt,-1,0,0,8,'z')); g.add(cyl(.12,.12,10,mt,1,0,0,8,'z'));
+    g.add(box(2.4,.6,1.6,M(0x404247),0,.1,1)); g.add(box(.5,.3,.5,M(0xb08d57,{m:.8}),0,.45,1.6));
+    g.add(cyl(1,1,1.2,mt,0,.2,-5.5,20,'z'));
+    part({pn:'MOD-35-60',name:'HEAD CARRIAGE + STEPPER',mat:'ZINC DIECAST · FERRITE',proc:'PURCHASED',wall:'—',draft:'—',fast:'2× M2 TO FRAME',note:'80-TRACK LEAD-SCREW. DUAL R/W HEADS. 3MS TRACK-TO-TRACK.',dir:[.7,.85,0],ord:.38},g); }
+  { const g=new THREE.Group(); g.position.set(0,1.45,2.5); const mt=METAL();
+    g.add(cyl(1.8,1.8,.35,mt,0,0,0,32)); g.add(cyl(.5,.5,.4,M(0x777a7e,{m:.9}),0,.2,0,16)); g.add(box(.3,.3,.3,mt,.9,.3,0));
+    part({pn:'MOD-35-50',name:'SPINDLE MOTOR',mat:'BRUSHLESS DC',proc:'PURCHASED',wall:'—',draft:'—',fast:'3× M2',note:'300 RPM DIRECT DRIVE. MAGNETIC CHUCK + DRIVE PIN.',dir:[0,.72,0],ord:.45},g); }
+  { const g=new THREE.Group(); g.position.set(0,1.1,0); const mt=METAL();
+    g.add(box(12,.15,16,mt,0,0,0)); g.add(box(.15,1.4,16,mt,-6,.7,0)); g.add(box(.15,1.4,16,mt,6,.7,0));
+    part({pn:'MOD-35-40',name:'DRIVE FRAME',mat:'SPCC 0.8MM',proc:'PROGRESSIVE DIE',wall:'0.8 MM',draft:'—',fast:'4× M2.6 + TABS',note:'DATUM FOR SPINDLE & CARRIAGE. EMBOSSED STIFFENING BEADS.',dir:[0,.35,0],ord:.55},g); }
+  { const g=new THREE.Group(); g.position.set(0,.72,-1); const pm=PCBM(), cm=M(0x161616);
+    g.add(box(12,.12,13,pm,0,0,0)); seed=3; for(let i=0;i<9;i++) g.add(box(.8+rnd()*1.6,.25,.6+rnd(),cm,-5+rnd()*10,.18,-5+rnd()*10));
+    g.add(box(4,1.2,.8,METAL(),0,.6,-7.8));
+    part({pn:'MOD-35-20',name:'CONTROLLER PCB + I/O',mat:'FR-4 1.2MM',proc:'SMT REFLOW',wall:'—',draft:'—',fast:'3× SNAP POSTS',note:'MFM ENCODER, READ AMP, 26-PIN FFC TO HOST.',dir:[0,-.55,-.4],ord:.62},g); }
+}
+
+/* ===================================================================
+   ARCHETYPE 3 : PTR-88 OPTO-MECHANICAL BALL MOUSE
+   =================================================================== */
+function buildMouse(){
+  const hemi=(sx,sy,sz,mat,phiS=0,phiL=Math.PI*2,thS=0,thL=Math.PI/2)=>{
+    const m=mesh(new THREE.SphereGeometry(1,48,24,phiS,phiL,thS,thL),mat); m.scale.set(sx,sy,sz); return m; };
+  { const g=new THREE.Group(); g.add(screw(METAL(),0,-.02,-2.5,1.6,.09));
+    part({pn:'PTR-88-90',name:'CENTER SCREW',mat:'STEEL',proc:'COLD HEADED',wall:'—',draft:'—',fast:'1× M2×12',note:'HIDDEN UNDER QC LABEL. VOID-IF-REMOVED.',dir:[0,-2.4,0],ord:0},g); }
+  { const g=new THREE.Group(); g.position.set(0,.05,.6); const m=M(0xC9C6BC,{role:'abs2',r:.6});
+    const ring=mesh(new THREE.RingGeometry(1.05,1.55,40),m); ring.rotation.x=Math.PI/2; g.add(ring);
+    g.add(cyl(1.55,1.55,.2,m,0,.1,0,40)); g.add(box(.6,.2,.3,m,1.6,.1,0)); g.add(box(.6,.2,.3,m,-1.6,.1,0));
+    part({pn:'PTR-88-05',name:'BALL RETAINER RING',mat:'POM · LIGHT GRAY',proc:'INJ. MOLD',wall:'1.2 MM',draft:'0.5°',fast:'BAYONET ¼-TURN',note:'TWIST-LOCK TABS FOR USER CLEANING. GROOVED GRIP EDGE.',dir:[0,-1.7,0],ord:.04},g); }
+  { const g=new THREE.Group(); g.position.set(0,1.0,.6);
+    g.add(mesh(new THREE.SphereGeometry(.95,32,20),M(0x3a3a3c,{r:.95})));
+    part({pn:'PTR-88-06',name:'TRACKING BALL',mat:'RUBBER-COATED STEEL',proc:'MOLDED OVER CORE',wall:'—',draft:'—',fast:'GRAVITY / RETAINER',note:'Ø19MM, 28G. HIGH-FRICTION NBR SKIN DRIVES ENCODER ROLLERS.',dir:[0,-1.25,0],ord:.08},g); }
+  { const g=new THREE.Group(); g.position.set(0,.35,0); const m=M(0xD6D2C6,{role:'abs2',r:.7});
+    const base=mesh(new THREE.CylinderGeometry(1,1,.3,56),m); base.scale.set(2.95,1,5.1); g.add(base);
+    g.add(box(2.4,.02,1.6,M(0xf2f2ee),0,-.16,-2.6));
+    for(const [x,z] of [[-1.8,-3.4],[1.8,-3.4],[-1.8,3],[1.8,3]]) g.add(cyl(.28,.28,.05,M(0xf5f5f0),x,-.17,z,14));
+    g.add(boss(m,0,.5,-2.5,.8,.3));
+    partingLine(g,2.95,5.1,.15,true);
+    part({pn:'PTR-88-02',name:'BASE PLATE',mat:'ABS · LIGHT GRAY',proc:'INJ. MOLD',wall:'1.6 MM',draft:'1.0°',fast:'1× CENTER BOSS + 3 HOOKS',note:'PTFE GLIDE PADS. BALL CAGE MOLDED IN. FCC LABEL RECESS.',dir:[0,-.75,0],ord:.35},g); }
+  { const g=new THREE.Group(); g.position.set(0,.66,-1.8); const pm=PCBM();
+    g.add(box(4.2,.1,4.2,pm,0,0,0)); g.add(box(1.2,.25,.8,M(0x161616),0,.15,-.6));
+    g.add(box(.25,.6,.25,M(0xdddddd),-.6,.35,1.6)); g.add(box(.25,.6,.25,M(0xdddddd),.6,.35,1.6));
+    part({pn:'PTR-88-20',name:'LOGIC BOARD',mat:'FR-1 PAPER PHENOLIC',proc:'SINGLE-SIDED THT',wall:'—',draft:'—',fast:'2× HEAT STAKE',note:'QUADRATURE DECODE ASIC. 2× MICRO-SWITCHES UNDER BUTTON PLUNGERS.',dir:[0,.3,-.55],ord:.6},g); }
+  { const g=new THREE.Group(); g.position.set(0,1.0,.6); const mt=METAL(), wh=M(0x1a1a1a);
+    g.add(cyl(.16,.16,2.2,mt,0,0,1.1,10,'x')); g.add(cyl(.55,.55,.06,wh,1.1,0,1.1,24,'x'));
+    g.add(cyl(.16,.16,2.2,mt,1.1,0,0,10,'z')); g.add(cyl(.55,.55,.06,wh,1.1,0,-1.1,24,'z'));
+    const idl=cyl(.2,.2,.6,M(0xbbbbbb),-.8,0,-.8,12,'x'); idl.rotation.y=Math.PI/4; g.add(idl);
+    g.add(box(.3,.4,.3,M(0x2244aa),1.5,0,1.5)); g.add(box(.3,.4,.3,M(0x2244aa),1.5,0,-1.5));
+    part({pn:'PTR-88-30',name:'ENCODER ASSY X/Y',mat:'STEEL SHAFTS · PC WHEELS',proc:'PURCHASED',wall:'—',draft:'—',fast:'SNAP CRADLES',note:'36-SLOT CHOPPER WHEELS + IR LED / PHOTOTRANSISTOR PAIRS. SPRING IDLER @45°.',dir:[0,.75,0],ord:.5},g); }
+  { const g=new THREE.Group(); g.position.set(0,.5,0); const m=ABS();
+    g.add(hemi(3,1.9,5.2,m)); g.add(hemi(2.85,1.76,5.05,m));
+    g.add(cyl(.32,.36,1.4,m,0,.8,-2.5,14));
+    partingLine(g,3,5.2,0,true);
+    part({pn:'PTR-88-01',name:'UPPER SHELL',mat:'ABS · PEARL GRAY',proc:'INJ. MOLD · HOT TIP',wall:'1.8 MM',draft:'N/A (DOUBLE-CURVED)',fast:'BOSS + 3 HOOKS',note:'ERGONOMIC DOME. GATE HIDDEN UNDER BUTTON SPLIT. A-SIDE MT-11020 TEXTURE.',dir:[0,1.1,0],ord:.25},g); }
+  { const g=new THREE.Group(); g.position.set(0,.5,0); const m=M(absColor.clone().multiplyScalar(.9),{role:'abs',r:.6});
+    const t0=.22,tl=.95;
+    g.add(hemi(3.06,1.95,5.3,m,Math.PI/2+.04,.95,t0,tl));
+    g.add(hemi(3.06,1.95,5.3,m,Math.PI/2-.99,.95,t0,tl));
+    part({pn:'PTR-88-03',name:'BUTTON PAIR L/R',mat:'ABS · PEARL GRAY',proc:'INJ. MOLD · LIVING HINGE',wall:'1.5 MM',draft:'—',fast:'HINGE TABS',note:'CANTILEVER HINGE AT REAR. 0.6MM PRE-TRAVEL TO SWITCH. 60GF ACTUATION.',dir:[0,1.75,.35],ord:.12},g); }
+  { const g=new THREE.Group(); g.position.set(0,.8,5.3); const m=M(0x9a978e);
+    g.add(cyl(.35,.25,1.2,m,0,0,0,14,'z'));
+    const curve=new THREE.CatmullRomCurve3([[0,0,.5],[0,-.2,2],[1,-.6,3.5],[-.5,-.75,5.5],[.4,-.78,7.5]].map(a=>new THREE.Vector3(...a)));
+    g.add(mesh(new THREE.TubeGeometry(curve,60,.14,8),M(0x8f8c84)));
+    part({pn:'PTR-88-40',name:'CABLE + STRAIN RELIEF',mat:'PVC 4-CORE',proc:'OVERMOLD',wall:'—',draft:'—',fast:'CLAMPED IN RIB MAZE',note:'BEND RELIEF RATED 10K FLEX CYCLES. DE-9 SERIAL TERMINATION.',dir:[0,0,1],ord:.3},g); }
+}
+
+/* ============ archetype table ============ */
+const ARCH={
+  term:{name:'MOD-84 TERMINAL',build:buildTerminal,S:18,center:[0,14,2],cam:[62,46,78],R:60,grid:160},
+  fdd:{name:'MOD-35 FDD UNIT',build:buildFDD,S:7,center:[0,2.5,0],cam:[24,18,28],R:22,grid:60},
+  mouse:{name:'PTR-88 POINTER',build:buildMouse,S:3.2,center:[0,1.2,0],cam:[11,9,13],R:10,grid:30},
+};
+let arch='term';
+
+function load(a){
+  arch=a; const A=ARCH[a];
+  if(model){ scene.remove(model); MATS.forEach(m=>m.dispose()); }
+  MATS=[]; parts=[]; selected=null; isolated=false; screenMat=null;
+  model=new THREE.Group(); scene.add(model);
+  A.build(); S=A.S;
+  // edges overlay
+  model.traverse(o=>{
+    if(o.isMesh && !o.userData.edge){
+      const k='e'+o.geometry.uuid; if(!GC.has(k)) GC.set(k,new THREE.EdgesGeometry(o.geometry,28));
+      const l=new THREE.LineSegments(GC.get(k),edgeMat); l.userData.edge=true; l.raycast=()=>{}; l.visible=false; o.add(l);
+    }
+  });
+  key.shadow.camera.left=key.shadow.camera.bottom=-A.R; key.shadow.camera.right=key.shadow.camera.top=A.R;
+  key.shadow.camera.far=400; key.shadow.camera.updateProjectionMatrix();
+  key.position.set(A.R*.8,A.R*1.6,A.R); key.target.position.set(...A.center);
+  makeGrid(A.grid);
+  resetView();
+  buildPartList(); buildTags(); updateSpec(); updateEdges(); applySection(); applyExplode();
+  $('#bomCount').textContent=String(parts.length).padStart(2,'0')+' MOD';
+  $('#hudTL').innerHTML=`ASSY: ${A.name}<br>MODULES: ${parts.length}`;
+  log(`LOAD ARCHETYPE ${A.name} · ${parts.length} MODULES`);
+}
+function resetView(){
+  const A=ARCH[arch];
+  camera.position.set(...A.cam); controls.target.set(...A.center); controls.update();
+}
+
+/* ============ explode ============ */
+let expTarget=0, expCur=0;
+const smooth=t=>t*t*(3-2*t);
+const STAG=.45;
+function applyExplode(){
+  for(const p of parts){
+    const e=smooth(THREE.MathUtils.clamp((expCur-p.ord*STAG)/(1-STAG),0,1));
+    p.obj.position.copy(p.base).addScaledVector(p.dir,e*S);
+  }
+}
+
+/* ============ selection / visibility ============ */
+function setHighlight(i,on){
+  if(i==null||!parts[i]) return;
+  parts[i].obj.traverse(o=>{ if(o.isMesh){ const ms=Array.isArray(o.material)?o.material:[o.material];
+    ms.forEach(m=>{ if(m.userData.keep) return; if(on){ m.emissive.set(phosphor); m.emissiveIntensity=.28; } else { m.emissive.copy(m.userData.baseEmissive); m.emissiveIntensity=m.userData.baseEI; } }); }});
+}
+function select(i){
+  if(selected===i) return;
+  setHighlight(selected,false); selected=i; setHighlight(selected,true);
+  updateEdges(); updateSpec();
+  document.querySelectorAll('#partList button').forEach((b,j)=>b.classList.toggle('sel',j===i));
+  if(isolated) applyIsolate();
+  if(i!=null){ click(); log(`SELECT ${parts[i].pn} // ${parts[i].name}`); }
+}
+function updateEdges(){
+  parts.forEach((p,i)=>p.obj.traverse(o=>{ if(o.userData.edge){ const s=i===selected; o.visible=state.xray||s; o.material=s?selEdgeMat:edgeMat; } }));
+}
+function applyIsolate(){
+  parts.forEach((p,i)=>{ p.obj.visible = !isolated || selected==null || i===selected; });
+  document.querySelectorAll('#partList button').forEach((b,j)=>b.classList.toggle('hid',!parts[j].obj.visible));
+  $('#bIso').classList.toggle('on',isolated);
+}
+function updateSpec(){
+  const el=$('#spec');
+  if(selected==null){ el.innerHTML='<h3>NO MODULE SELECTED</h3>CLICK A COMPONENT IN THE<br>OPTICAL BENCH OR BILL OF<br>MODULES TO READ SPEC SHEET.'; return; }
+  const p=parts[selected];
+  const row=(k,v)=>`<tr><td>${k}</td><td>${v}</td></tr>`;
+  el.innerHTML=`<h3>${p.pn}</h3><table>${row('NAME',p.name)}${row('MATL',p.mat)}${row('PROC',p.proc)}${row('WALL',p.wall)}${row('DRAFT',p.draft)}${row('FAST',p.fast)}${row('AXIS',`[${p.dir.toArray().map(v=>(v>=0?'+':'')+v.toFixed(2)).join(' ')}]`)}</table><div style="margin-top:6px;opacity:.85">${p.note}</div>`;
+}
+function buildPartList(){
+  const L=$('#partList'); L.innerHTML='';
+  parts.forEach((p,i)=>{ const b=document.createElement('button');
+    b.innerHTML=`<span>${p.pn}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name}</span>`;
+    b.onclick=()=>select(selected===i?null:i); L.appendChild(b); });
+}
+
+/* ============ labels ============ */
+const tagsEl=$('#tags'); let tagEls=[];
+function buildTags(){ tagsEl.innerHTML=''; tagEls=parts.map(p=>{ const d=document.createElement('div'); d.className='tag'; d.textContent=p.pn; tagsEl.appendChild(d); return d; }); }
+const _b=new THREE.Box3(), _v=new THREE.Vector3();
+function updateTags(){
+  tagsEl.style.display=state.labels?'block':'none'; if(!state.labels) return;
+  const w=vp.clientWidth,h=vp.clientHeight;
+  parts.forEach((p,i)=>{ const d=tagEls[i];
+    if(!p.obj.visible){ d.style.display='none'; return; }
+    _b.setFromObject(p.obj); _b.getCenter(_v); _v.y=_b.max.y;
+    _v.project(camera);
+    if(_v.z>1){ d.style.display='none'; return; }
+    d.style.display='block'; d.style.left=((_v.x+1)/2*w)+'px'; d.style.top=((1-_v.y)/2*h-14)+'px';
+    d.classList.toggle('sel',i===selected); });
+}
+
+/* ============ section ============ */
+function applySection(){
+  const R=ARCH[arch].R*.7;
+  clipPlane.constant = (+$('#sec').value/100)*R;
+  const v=Math.round(+$('#sec').value); $('#secVal').textContent=(v>=0?'+':'-')+String(Math.abs(v)).padStart(3,'0');
+  MATS.forEach(applyMat);
+  model.traverse(o=>{ if(o.userData.parting){ o.visible=state.parting; } });
+}
+
+/* ============ picking ============ */
+const ray=new THREE.Raycaster(), ndc=new THREE.Vector2(), tip=$('#tip');
+function pick(ev){
+  const r=renderer.domElement.getBoundingClientRect();
+  ndc.set(((ev.clientX-r.left)/r.width)*2-1, -((ev.clientY-r.top)/r.height)*2+1);
+  ray.setFromCamera(ndc,camera);
+  const hits=ray.intersectObject(model,true);
+  for(const h of hits){
+    if(!h.object.isMesh) continue;
+    let o=h.object, vis=true; while(o){ if(!o.visible){vis=false;break;} o=o.parent; }
+    if(!vis) continue;
+    if(state.section && h.point.x>clipPlane.constant) continue;
+    return h.object.userData.partIndex;
+  }
+  return null;
+}
+let downAt=null;
+renderer.domElement.addEventListener('pointerdown',e=>{downAt=[e.clientX,e.clientY];});
+renderer.domElement.addEventListener('pointerup',e=>{
+  if(!downAt) return; const moved=Math.hypot(e.clientX-downAt[0],e.clientY-downAt[1]); downAt=null;
+  if(moved<5){ const i=pick(e); select(i===selected?null:(i??null)); }
+});
+renderer.domElement.addEventListener('pointermove',e=>{
+  if(e.buttons) { tip.style.display='none'; return; }
+  const i=pick(e);
+  if(i==null){ tip.style.display='none'; renderer.domElement.style.cursor='crosshair'; return; }
+  const r=vp.getBoundingClientRect();
+  tip.textContent=`${parts[i].pn} // ${parts[i].name}`; tip.style.display='block';
+  tip.style.left=Math.min(e.clientX-r.left+14,r.width-tip.offsetWidth-6)+'px'; tip.style.top=(e.clientY-r.top+16)+'px';
+  renderer.domElement.style.cursor='pointer';
+});
+renderer.domElement.addEventListener('pointerleave',()=>tip.style.display='none');
+
+/* ============ controls wiring ============ */
+const expIn=$('#exp');
+let lastTick=0;
+expIn.addEventListener('input',()=>{
+  expTarget=expIn.value/100; seqRunning=false; $('#bSeq').textContent='▶ Run Teardown';
+  const step=Math.floor(expIn.value/5); if(step!==lastTick){ lastTick=step; blip(600+expIn.value*8,.012,'square',.025); }
+});
+expIn.addEventListener('change',()=>log(`SEPARATION SET ${expIn.value}%`));
+$('#sec').addEventListener('input',()=>{ applySection(); blip(900,.01,'square',.02); });
+
+const bindTog=(id,fn)=>$(id).addEventListener('change',e=>{ thunk(); fn(e.target.checked); });
+bindTog('#tXray',v=>{ state.xray=v; MATS.forEach(applyMat); updateEdges(); log(`X-RAY ${v?'ENGAGED':'OFF'}`); });
+bindTog('#tSec',v=>{ state.section=v; applySection(); log(`SECTION PLANE ${v?'ARMED':'OFF'} · X=${clipPlane.constant.toFixed(1)}`); });
+bindTog('#tLab',v=>{ state.labels=v; log(`PART LABELS ${v?'ON':'OFF'}`); });
+bindTog('#tPart',v=>{ state.parting=v; applySection(); log(`PARTING LINES ${v?'VISIBLE':'HIDDEN'}`); });
+bindTog('#tRot',v=>{ controls.autoRotate=v; });
+bindTog('#tGrid',v=>{ if(grid) grid.visible=v; });
+bindTog('#tPh',v=>{
+  phosphor=v?PH.green:PH.amber;
+  document.documentElement.style.setProperty('--ph',phosphor);
+  document.documentElement.style.setProperty('--ph-dim',v?'rgba(51,255,51,.14)':'rgba(255,176,0,.14)');
+  $('#drop').style.setProperty('--hue',v?'60deg':'-15deg');
+  edgeMat.color.set(phosphor); makeGrid(ARCH[arch].grid); setHighlight(selected,true);
+  log(`PHOSPHOR ${v?'P1 GREEN':'P3 AMBER'}`);
+});
+bindTog('#tSnd',v=>{});
+
+$('#bIso').onclick=()=>{ thunk(); if(selected==null){ log('ISOLATE: NO MODULE SELECTED'); return; } isolated=!isolated; applyIsolate(); log(`ISOLATE ${isolated?parts[selected].pn:'OFF'}`); };
+$('#bClr').onclick=()=>{ thunk(); isolated=false; select(null); applyIsolate(); };
+$('#bView').onclick=()=>{ thunk(); resetView(); log('CAMERA RESET TO DATUM'); };
+
+let seqRunning=false;
+$('#bSeq').onclick=()=>{
+  thunk(); seqRunning=true;
+  expTarget = expCur>.5 ? 0 : 1;
+  $('#bSeq').textContent = expTarget ? '■ Teardown…' : '■ Reassembly…';
+  log(expTarget?'TEARDOWN SEQUENCE INITIATED':'REASSEMBLY SEQUENCE INITIATED');
+  const order=[...parts].sort((a,b)=>expTarget?a.ord-b.ord:b.ord-a.ord);
+  order.forEach((p,k)=>setTimeout(()=>{ if(seqRunning){ log(`${expTarget?'DISENGAGE':'SEAT'} ${p.pn} // ${p.name}`); blip(300+k*40,.03,'square',.03);} },k*160));
+};
+
+document.querySelectorAll('#archKeys .btn').forEach(b=>b.onclick=()=>{
+  thunk(); document.querySelectorAll('#archKeys .btn').forEach(x=>x.classList.toggle('on',x===b));
+  load(b.dataset.a);
+});
+
+/* ============ reference ingest ============ */
+const drop=$('#drop'), fileIn=$('#file'), refImg=$('#refImg'), refOv=$('#refOverlay');
+let sampled=null;
+drop.onclick=()=>fileIn.click();
+drop.onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); fileIn.click(); } };
+fileIn.onchange=()=>fileIn.files[0]&&ingest(fileIn.files[0]);
+['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over');}));
+['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('over');}));
+drop.addEventListener('drop',e=>{ const f=e.dataTransfer.files[0]; if(f&&f.type.startsWith('image/')) ingest(f); });
+function ingest(f){
+  const url=URL.createObjectURL(f);
+  refImg.onload=()=>{
+    refImg.style.display='block'; $('#dropMsg').style.display='none';
+    refOv.src=url; refOv.style.display='block'; updateTrace();
+    // sample dominant housing tone from centre 50% (excluding near-white/near-black background)
+    const c=document.createElement('canvas'); c.width=c.height=64; const x=c.getContext('2d');
+    x.drawImage(refImg,0,0,64,64); const d=x.getImageData(16,16,32,32).data;
+    let r=0,g=0,b=0,n=0;
+    for(let i=0;i<d.length;i+=4){ const l=(d[i]+d[i+1]+d[i+2])/3; if(l>235||l<25) continue; r+=d[i];g+=d[i+1];b+=d[i+2];n++; }
+    if(!n){ n=1; r=g=b=200; }
+    sampled=new THREE.Color(r/n/255,g/n/255,b/n/255);
+    const hex='#'+sampled.getHexString().toUpperCase();
+    $('#sw').style.background=hex; $('#swHex').textContent=`${hex} · SAMPLED`;
+    $('#bHue').disabled=false;
+    const ar=refImg.naturalWidth/refImg.naturalHeight;
+    const guess= ar>1.6?'fdd': ar>1.15?'term':'mouse';
+    log(`REF MOUNTED ${f.name.slice(0,22).toUpperCase()} · ${refImg.naturalWidth}×${refImg.naturalHeight}`);
+    log(`DOMINANT TONE ${hex} · ASPECT ${ar.toFixed(2)} · SUGGEST ${ARCH[guess].name}`);
+    blip(440,.08,'square',.04); setTimeout(()=>blip(880,.08,'square',.04),90);
+  };
+  refImg.src=url;
+}
+$('#bHue').onclick=()=>{
+  if(!sampled) return; thunk();
+  // pull sample toward plastic-plausible range
+  const hsl={}; sampled.getHSL(hsl);
+  absColor.setHSL(hsl.h, Math.min(hsl.s,.35), THREE.MathUtils.clamp(hsl.l,.35,.85));
+  MATS.forEach(m=>{ if(m.userData.role==='abs') m.color.copy(absColor); if(m.userData.role==='abs2') m.color.copy(absColor).multiplyScalar(.82); });
+  log(`ABS COLORANT MATCHED → #${absColor.getHexString().toUpperCase()}`);
+};
+function updateTrace(){ const on=$('#tTrace').checked && refOv.src; refOv.style.opacity=on?$('#trOp').value/100:0; }
+$('#tTrace').addEventListener('change',()=>{ thunk(); updateTrace(); log(`TRACE OVERLAY ${$('#tTrace').checked?'ON':'OFF'}`); });
+$('#trOp').addEventListener('input',updateTrace);
+
+/* ============ resize / loop ============ */
+function resize(){ const w=vp.clientWidth,h=vp.clientHeight; renderer.setSize(w,h,false); camera.aspect=w/h;
+  // keep horizontal coverage on tall/narrow viewports
+  const base=35*Math.PI/180, ref=1.5;
+  camera.fov = camera.aspect<ref ? THREE.MathUtils.radToDeg(2*Math.atan(Math.tan(base/2)*ref/camera.aspect)) : 35;
+  camera.fov=Math.min(camera.fov,75);
+  camera.updateProjectionMatrix(); }
+new ResizeObserver(resize).observe(vp);
+
+const clock=new THREE.Clock(); let scrT=0;
+function frame(){
+  const dt=Math.min(clock.getDelta(),.05), t=clock.elapsedTime;
+  const prev=expCur;
+  expCur += (expTarget-expCur)*Math.min(1,dt*(seqRunning?1.6:9));
+  if(Math.abs(expTarget-expCur)<.0005) expCur=expTarget;
+  if(seqRunning){ expIn.value=Math.round(expCur*100); if(expCur===expTarget){ seqRunning=false; $('#bSeq').textContent='▶ Run Teardown'; log(expTarget?'TEARDOWN COMPLETE':'ASSEMBLY SEATED'); } }
+  if(prev!==expCur) applyExplode();
+  $('#expVal').textContent=String(Math.round(expCur*100)).padStart(3,'0');
+  $('#ledWarn').classList.toggle('on',expCur>.02);
+  controls.update();
+  if(screenMat && t-scrT>.25){ scrT=t; drawScreen(t); }
+  renderer.render(scene,camera);
+  updateTags();
+  const p=camera.position;
+  $('#hudTR').innerHTML=`CAM X${p.x.toFixed(1)} Y${p.y.toFixed(1)} Z${p.z.toFixed(1)}<br>EXP ${(expCur*100).toFixed(1)}% · ${state.section?'SECT':'FULL'}${state.xray?' · XRAY':''}`;
+  $('#hudBR').textContent=`TRI ${renderer.info.render.triangles.toLocaleString()} · DRAW ${renderer.info.render.calls}`;
+  requestAnimationFrame(frame);
+}
+setInterval(()=>{ $('#clock').textContent=new Date().toTimeString().slice(0,8); },1000);
+$('#clock').textContent=new Date().toTimeString().slice(0,8);
+
+['MOD-84 DECONSTRUCTOR BOOT','OPTICAL BENCH CALIBRATED','MODULE LIBRARY V2.1 LOADED'].forEach((m,i)=>setTimeout(()=>log(m),i*120));
+load('term');
+resize();
+frame();
+</script>
+</body>
+</html>
