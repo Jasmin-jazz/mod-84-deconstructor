@@ -48,7 +48,7 @@ body::after{
 /* ---------- structural grid ---------- */
 main{
   position:relative; flex:1; min-height:0;
-  display:grid; grid-template-columns:300px 330px minmax(0,1fr);
+  display:grid; grid-template-columns:340px minmax(0,1fr);
   border:1px solid var(--line);
 }
 main>*{min-width:0}
@@ -175,8 +175,8 @@ main::after{bottom:-6px;right:-6px}
 #partList::-webkit-scrollbar-button,#fileList::-webkit-scrollbar-button{display:none}
 
 /* ---------- bill of modules ---------- */
-#partList{position:relative;max-height:420px;overflow:auto;border-top:1px solid var(--line)}
-#partList button{all:unset;display:grid;grid-template-columns:70px 1fr 10px;align-items:center;gap:8px;width:100%;box-sizing:border-box;padding:6px 8px;cursor:pointer;
+#partList{position:relative;max-height:190px;/* 7 rows × 27px + top hairline */overflow:auto;border-top:1px solid var(--line)}
+#partList button{all:unset;display:grid;grid-template-columns:70px 1fr 10px;align-items:center;gap:8px;width:100%;height:27px;box-sizing:border-box;padding:0 8px;cursor:pointer;
   font:400 10.5px/1.3 var(--mono);border-bottom:1px solid var(--line)}
 #partList button span:first-child{color:var(--ink2)}
 #partList button:hover{background:rgba(var(--k),.045)}
@@ -220,17 +220,13 @@ footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 24px;pa
 
 @media (max-width:1180px){
   main{grid-template-columns:300px minmax(0,1fr)}
-  main>.col:first-child{grid-column:1;grid-row:1}
-  #rightCol{grid-column:1;grid-row:2;border-left:0;border-top:1px solid var(--line)}
-  #vpWrap{grid-column:2;grid-row:1 / 3}
 }
 @media (max-width:760px){
   body{padding:16px}
   main{grid-template-columns:1fr}
   main>*+*{border-left:0}
   main>*{border-top:1px solid var(--line)}
-  #vpWrap{order:-1;min-height:auto;border-top:0;grid-column:auto;grid-row:auto}
-  main>.col:first-child,#rightCol{grid-column:auto;grid-row:auto}
+  #vpWrap{order:-1;min-height:auto;border-top:0}
   #vp{position:relative;top:auto;height:58vh}
   .hud.bl{display:none}
   .hud.tr{top:54px;left:40px;right:auto;text-align:left}
@@ -247,7 +243,7 @@ footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 24px;pa
 <body>
 
 <main>
-  <!-- LIBRARY -->
+  <!-- CONTROLS -->
   <div class="col">
     <section class="panel">
       <div class="phead"><span class="idx">A1</span><h2>Products</h2><span class="meta">3 saved</span></div>
@@ -264,21 +260,8 @@ footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 24px;pa
       <div class="row" id="docRow" style="margin-top:10px"><button class="btn" id="bDocClr">Clear files</button><span class="meta" id="docCount">00 DOC</span></div>
     </section>
 
-    <section class="panel" style="flex:1">
-      <div class="phead"><span class="idx">A2</span><h2>Modules</h2><span class="meta" id="bomCount">00 MOD</span></div>
-      <div id="partList"></div>
-      <div class="row" style="margin-top:14px">
-        <button class="btn" id="bIso">Isolate</button>
-        <button class="btn" id="bClr">Clear selection</button>
-      </div>
-      <div id="spec" hidden></div>
-    </section>
-  </div>
-
-  <!-- CONTROLS -->
-  <div class="col" id="rightCol">
     <section class="panel">
-      <div class="phead"><span class="idx">B1</span><h2>Deconstruction</h2></div>
+      <div class="phead"><span class="idx">A2</span><h2>Deconstruction</h2></div>
       <div class="ctl-h">
         <div><div class="lbl">Separation</div><div class="sub">Axial offset · staged</div></div>
         <div class="readout"><span id="expVal">000</span><small>%</small></div>
@@ -288,19 +271,16 @@ footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 24px;pa
       <div class="ticks"><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div>
       <div class="hr"></div>
       <div class="ctl-h">
-        <div><div class="lbl">Section plane X</div><div class="sub">Wall thickness</div></div>
-        <div class="right">
-          <label class="tog" title="Arm the section plane"><span class="tl">Cut</span><input type="checkbox" id="tSec"><span class="sw"></span></label>
-          <div class="readout"><span id="secVal">+000</span></div>
-        </div>
+        <div><div class="lbl">Section cut</div><div class="sub">0 = full view · drag to slice</div></div>
+        <div class="readout"><span id="secVal">000</span><small>%</small></div>
       </div>
-      <input class="fader" type="range" id="sec" min="-50" max="100" value="0" aria-label="Section plane position">
-      <div class="scale" style="--maj:3;--min:15"></div>
-      <div class="ticks"><span>−50</span><span>0</span><span>+50</span><span>+100</span></div>
+      <input class="fader" type="range" id="sec" min="0" max="100" value="0" aria-label="Section cut amount">
+      <div class="scale" style="--maj:4;--min:20"></div>
+      <div class="ticks"><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div>
     </section>
 
-    <section class="panel" style="flex:1">
-      <div class="phead"><span class="idx">B2</span><h2>Bench controls</h2></div>
+    <section class="panel">
+      <div class="phead"><span class="idx">A3</span><h2>Bench controls</h2></div>
       <div class="togs">
         <label class="tog"><span class="tl">X-ray</span><input type="checkbox" id="tXray"><span class="sw"></span></label>
         <label class="tog"><span class="tl">Labels</span><input type="checkbox" id="tLab"><span class="sw"></span></label>
@@ -310,10 +290,21 @@ footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 24px;pa
         <label class="tog"><span class="tl" id="tThemeLbl">Light theme</span><input type="checkbox" id="tTheme"><span class="sw"></span></label>
       </div>
     </section>
+
+    <section class="panel" style="flex:1">
+      <div class="phead"><span class="idx">A4</span><h2>Modules</h2><span class="meta" id="bomCount">00 MOD</span></div>
+      <div id="partList"></div>
+      <div class="row" style="margin-top:14px">
+        <button class="btn" id="bIso">Isolate</button>
+        <button class="btn" id="bClr">Clear selection</button>
+      </div>
+      <div id="spec" hidden></div>
+    </section>
   </div>
+
   <!-- 3D BENCH -->
   <section class="panel" id="vpWrap">
-    <div class="phead"><span class="idx">C0</span><h2>Optical bench</h2><span class="meta">Ortho-perspective feed</span></div>
+    <div class="phead"><span class="idx">B0</span><h2>Optical bench</h2><span class="meta">Ortho-perspective feed</span></div>
     <div class="vpbar">
       <button class="btn primary" id="bSeq">Run teardown</button>
       <button class="btn" id="bView">Reset all</button>
@@ -452,7 +443,7 @@ function shell(w,h,d,t,mat,open=[]){
   const g=new THREE.Group();
   const F={top:[w,t,d,0,h/2-t/2,0],bottom:[w,t,d,0,-h/2+t/2,0],front:[w,h,t,0,0,d/2-t/2],
            back:[w,h,t,0,0,-d/2+t/2],left:[t,h,d,-w/2+t/2,0,0],right:[t,h,d,w/2-t/2,0,0]};
-  for(const k in F) if(!open.includes(k)) g.add(box(...F[k],mat));
+  for(const k in F) if(!open.includes(k)){ const [bw,bh,bd,bx,by,bz]=F[k]; g.add(box(bw,bh,bd,mat,bx,by,bz)); }
   return g;
 }
 /* screw boss: OD wall + cored pilot hole */
@@ -736,6 +727,14 @@ function load(a){
   MATS=[]; parts=[]; selected=null; isolated=false; screenMat=null;
   model=new THREE.Group(); scene.add(model);
   A.build(); S=A.S;
+  { // assembled width of the solid parts, for the section cut
+    model.updateMatrixWorld(true);
+    let lo=Infinity, hi=-Infinity; const bb=new THREE.Box3();
+    model.traverse(o=>{ if(!o.isMesh) return; o.geometry.computeBoundingBox();
+      bb.copy(o.geometry.boundingBox).applyMatrix4(o.matrixWorld);
+      if(isFinite(bb.min.x)&&isFinite(bb.max.x)){ lo=Math.min(lo,bb.min.x); hi=Math.max(hi,bb.max.x); } });
+    secX = isFinite(lo)&&isFinite(hi) ? [lo,hi] : [-A.R*.5,A.R*.5];
+  }
   // edges overlay
   model.traverse(o=>{
     if(o.isMesh && !o.userData.edge){
@@ -798,11 +797,12 @@ const specEl=$('#spec');
 function updateSpec(){
   const el=specEl, L=$('#partList'), btns=L.querySelectorAll('button');
   btns.forEach((b,j)=>b.setAttribute('aria-expanded',j===selected));
-  if(selected==null||!btns[selected]){ el.remove(); return; }
+  if(selected==null||!btns[selected]){ el.remove(); L.style.maxHeight=''; return; }
   const p=parts[selected];
   const row=(k,v)=>`<tr><td>${k}</td><td>${v}</td></tr>`;
   el.innerHTML=`<table>${row('MATL',p.mat)}${row('PROC',p.proc)}${row('WALL',p.wall)}${row('DRAFT',p.draft)}${row('FAST',p.fast)}${row('AXIS',`[${p.dir.toArray().map(v=>(v>=0?'+':'')+v.toFixed(2)).join(' ')}]`)}</table><div style="margin-top:6px;opacity:.85">${p.note}</div>`;
   const b=btns[selected]; el.hidden=false; b.after(el);
+  L.style.maxHeight=(7*27+1+el.offsetHeight)+'px';   // still 7 rows, plus room for the open drawer
   // keep the open row and its drawer inside the list's own scroll area
   if(b.offsetTop<L.scrollTop) L.scrollTop=b.offsetTop;
   else if(el.offsetTop+el.offsetHeight>L.scrollTop+L.clientHeight) L.scrollTop=Math.min(b.offsetTop, el.offsetTop+el.offsetHeight-L.clientHeight);
@@ -831,10 +831,13 @@ function updateTags(){
 }
 
 /* ============ section ============ */
+let secX=[-1,1];
 function applySection(){
-  const R=ARCH[arch].R*.7;
-  clipPlane.constant = (+$('#sec').value/100)*R;
-  const v=Math.round(+$('#sec').value); $('#secVal').textContent=(v>=0?'+':'-')+String(Math.abs(v)).padStart(3,'0');
+  // slider is the whole control: 0 = full view, 100 = sliced all the way across the model's own width
+  const v=Math.round(+$('#sec').value);
+  state.section = v>0;
+  clipPlane.constant = secX[1] - (v/100)*(secX[1]-secX[0]);
+  $('#secVal').textContent=String(v).padStart(3,'0');
   MATS.forEach(applyMat);
   model.traverse(o=>{ if(o.userData.parting){ o.visible=state.parting; } });
 }
@@ -884,7 +887,6 @@ $('#sec').addEventListener('input',()=>{ applySection(); blip(900,.01,'square',.
 
 const bindTog=(id,fn)=>$(id).addEventListener('change',e=>{ thunk(); fn(e.target.checked); });
 bindTog('#tXray',v=>{ state.xray=v; MATS.forEach(applyMat); updateEdges(); log(`X-RAY ${v?'ENGAGED':'OFF'}`); });
-bindTog('#tSec',v=>{ state.section=v; applySection(); log(`SECTION PLANE ${v?'ARMED':'OFF'} · X=${clipPlane.constant.toFixed(1)}`); });
 bindTog('#tLab',v=>{ state.labels=v; log(`PART LABELS ${v?'ON':'OFF'}`); });
 bindTog('#tRot',v=>{ controls.autoRotate=v; });
 bindTog('#tGrid',v=>{ if(grid) grid.visible=v; });
@@ -894,7 +896,7 @@ $('#bIso').onclick=()=>{ thunk(); if(selected==null){ log('ISOLATE: NO MODULE SE
 $('#bClr').onclick=()=>{ thunk(); isolated=false; select(null); applyIsolate(); };
 $('#bView').onclick=()=>{
   thunk(); quiet=true;   // one click sound, not one per switch
-  for(const [id,def] of [['#tXray',false],['#tSec',false],['#tLab',false],['#tRot',false],['#tGrid',true]]){
+  for(const [id,def] of [['#tXray',false],['#tLab',false],['#tRot',false],['#tGrid',true]]){
     const t=$(id); if(t.checked!==def){ t.checked=def; t.dispatchEvent(new Event('change')); }
   }
   $('#sec').value=0; applySection();
